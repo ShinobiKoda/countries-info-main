@@ -12,6 +12,8 @@ const CountryApp = () => {
     "Poland",
     "United States of America",
     "United Kingdom",
+    "Germany",
+    "Iceland",
   ];
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +53,7 @@ const CountryApp = () => {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
-        // console.log(data);
+        console.log(data);
       }
     };
 
@@ -74,7 +76,7 @@ const CountryApp = () => {
   };
 
   return (
-    <div className="w-full h-screen">
+    <div className="w-full h-full">
       <div className="flex justify-between px-4 py-6 shadow-md w-full dark:bg-[#2b3743]">
         <h3 className="dark:text-white">Where in the world?</h3>
         <div className="flex gap-3" onClick={toggleDarkMode}>
@@ -90,7 +92,7 @@ const CountryApp = () => {
         </div>
       </div>
 
-      <div className="bg-[#f5f5f5] w-full h-screen dark:bg-[#202d36] py-8 flex flex-col gap-12 px-8">
+      <div className="bg-[#f5f5f5] w-full h-full dark:bg-[#202d36] py-8 flex flex-col gap-12 px-8">
         <div className="w-full">
           <div className="bg-white dark:bg-[#2b3743] px-6 py-4 rounded-sm flex gap-4 items-center shadow-md">
             <FontAwesomeIcon
@@ -107,13 +109,15 @@ const CountryApp = () => {
         </div>
 
         <div className="w-full">
-          <div className="bg-white dark:bg-[#2b3743] rounded-md w-[12rem] p-4 shadow-md">
+          <div className="bg-white dark:bg-[#2b3743] rounded-md w-[12rem] p-4 shadow-md cursor-pointer hover:opacity-80">
             <select
               value={selectedRegion}
               onChange={(e) => setSelectedRegion(e.target.value)}
-              className="bg-transparent border-none outline-none dark:text-white dark:bg-[#2b3743]"
+              className="bg-transparent border-none outline-none dark:text-white dark:bg-[#2b3743] cursor-pointer hover:opacity-80"
             >
-              <option value="">Filter by Region</option>
+              <option value="" disabled>
+                Filter by Region
+              </option>
               <option value="Africa">Africa</option>
               <option value="Americas">Americas</option>
               <option value="Asia">Asia</option>
@@ -123,14 +127,30 @@ const CountryApp = () => {
           </div>
         </div>
 
-        <div>
+        <div className="flex flex-col gap-8 w-full">
           {data.map((country, index) => (
-            <div key={index}>
-              <h3 className="dark:text-white">{country.name.common}</h3>
-              <p className="dark:text-white">
-                Population: {country.population}
-              </p>
-              <p className="dark:text-white">Region: {country.region}</p>
+            <div key={index} className="shadow-md rounded-md w-full">
+              <div>
+                <img
+                  src={country.flags.svg}
+                  alt="Flag"
+                  className="w-full rounded-t-md"
+                />
+              </div>
+              <div className="px-4 py-10 dark:bg-[#2b3743] flex flex-col gap-3">
+                <h3 className="dark:text-white text-xl font-bold">
+                  {country.name.common}
+                </h3>
+                <p className="dark:text-white">
+                  Population: <span>{country.population}</span>
+                </p>
+                <p className="dark:text-white">
+                  Region: <span>{country.region}</span>
+                </p>
+                <p className="dark:text-white">
+                  Capital: <span>{country.capital}</span>
+                </p>
+              </div>
             </div>
           ))}
         </div>
