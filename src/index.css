@@ -9,3 +9,11 @@
 .light-svg-fill {
   fill: rgba(0, 0, 0, 1);
 }
+
+.region-list {
+  display: none;
+}
+
+.show-region {
+  display: block;
+}

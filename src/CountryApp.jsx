@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon as regularMoon } from "@fortawesome/free-regular-svg-icons";
 import { faMoon as solidMoon } from "@fortawesome/free-solid-svg-icons";
 import { faSearch as searchIcon } from "@fortawesome/free-solid-svg-icons";
+import { faArrowDown as arrowIcon } from "@fortawesome/free-solid-svg-icons";
 import { Atom } from "react-loading-indicators";
 
 const CountryApp = () => {
@@ -18,8 +19,11 @@ const CountryApp = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState("");
-  // const [isDropdownVisible, setDropdownVisible] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState("Filter by Region");
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+
+  const regions = ["Africa", "America", "Asia", "Europe", "Oceania"];
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode") === "true";
@@ -41,7 +45,7 @@ const CountryApp = () => {
               throw new Error(`Failed to fetch data for ${country}`);
             }
             const countryData = await response.json();
-            return countryData[0]; // Assuming the first result is the relevant one
+            return countryData[0];
           })
         );
         setData(allCountriesData);
@@ -53,12 +57,18 @@ const CountryApp = () => {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
-        console.log(data);
       }
     };
 
     fetchCountryData();
   }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    document.documentElement.classList.toggle("dark", newDarkMode);
+    localStorage.setItem("darkMode", newDarkMode);
+  };
 
   if (loading) {
     return (
@@ -68,11 +78,30 @@ const CountryApp = () => {
     );
   }
 
-  const toggleDarkMode = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    document.documentElement.classList.toggle("dark", newDarkMode);
-    localStorage.setItem("darkMode", newDarkMode); // Save the new preference in localStorage
+  const toggleDropdown = () => setIsOpen(!isOpen);
+
+  const selectRegion = (region, index) => {
+    setSelectedRegion(region);
+    setIsOpen(false);
+    setHighlightedIndex(index); // Reset highlight to the selected item
+  };
+
+  const handleKeyDown = (e) => {
+    if (isOpen) {
+      if (e.key === "ArrowDown") {
+        setHighlightedIndex((prevIndex) => (prevIndex + 1) % regions.length);
+      } else if (e.key === "ArrowUp") {
+        setHighlightedIndex(
+          (prevIndex) => (prevIndex - 1 + regions.length) % regions.length
+        );
+      } else if (e.key === "Enter") {
+        selectRegion(regions[highlightedIndex], highlightedIndex);
+      } else if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    } else if (e.key === "Enter") {
+      setIsOpen(true);
+    }
   };
 
   return (
@@ -109,21 +138,37 @@ const CountryApp = () => {
         </div>
 
         <div className="w-full">
-          <div className="bg-white dark:bg-[#2b3743] rounded-md w-[12rem] p-4 shadow-md cursor-pointer hover:opacity-80">
-            <select
-              value={selectedRegion}
-              onChange={(e) => setSelectedRegion(e.target.value)}
-              className="bg-transparent border-none outline-none dark:text-white dark:bg-[#2b3743] cursor-pointer hover:opacity-80"
+          <div className="w-[12rem] dark:text-white flex flex-col gap-2 relative">
+            <button
+              onClick={toggleDropdown}
+              onKeyDown={handleKeyDown}
+              className="w-full dark:bg-[#2b3743] p-4 rounded-md shadow-md flex justify-between items-center cursor-pointer hover:opacity-90 bg-white"
             >
-              <option value="" disabled>
-                Filter by Region
-              </option>
-              <option value="Africa">Africa</option>
-              <option value="Americas">Americas</option>
-              <option value="Asia">Asia</option>
-              <option value="Europe">Europe</option>
-              <option value="Oceania">Oceania</option>
-            </select>
+              {selectedRegion}
+              <FontAwesomeIcon
+                icon={arrowIcon}
+                size="lg"
+                style={{ color: darkMode ? "white" : "black" }}
+                onClick={toggleDropdown}
+              />
+            </button>
+            {isOpen && (
+              <ul
+                className="dark:bg-[#2b3743] p-3 rounded-md shadow-md absolute top-full w-full mt-1 flex flex-col gap-3 bg-white shadow-md"
+                tabIndex="0"
+              >
+                {regions.map((region, index) => (
+                  <li
+                    key={region}
+                    className="hover:opacity-90 cursor-pointer"
+                    onClick={() => selectRegion(region, index)}
+                    onMouseEnter={() => setHighlightedIndex(index)}
+                  >
+                    {region}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
