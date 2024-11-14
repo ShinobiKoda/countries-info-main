@@ -106,9 +106,9 @@ const CountryApp = () => {
 
   return (
     <div className="w-full h-full">
-      <div className="flex justify-between px-4 py-6 shadow-md w-full dark:bg-[#2b3743]">
-        <h3 className="dark:text-white">Where in the world?</h3>
-        <div className="flex gap-3" onClick={toggleDarkMode}>
+      <div className="flex justify-between px-4 py-6 shadow-md w-full dark:bg-[#2b3743] items-center">
+        <h3 className="dark:text-white font-bold">Where in the world?</h3>
+        <div className="flex gap-3 items-center" onClick={toggleDarkMode}>
           <FontAwesomeIcon
             icon={darkMode ? solidMoon : regularMoon}
             size="lg"
@@ -132,7 +132,7 @@ const CountryApp = () => {
             <input
               type="text"
               placeholder="Search for a country..."
-              className="bg-transparent border-none outline-none dark:text-white placeholder-[#dadada] dark:placeholder-[#e9f2fb]"
+              className="bg-transparent border-none outline-none dark:text-white placeholder-[#dadada] dark:placeholder-[#e9f2fb] w-full"
             />
           </div>
         </div>
@@ -154,7 +154,7 @@ const CountryApp = () => {
             </button>
             {isOpen && (
               <ul
-                className="dark:bg-[#2b3743] p-3 rounded-md shadow-md absolute top-full w-full mt-1 flex flex-col gap-3 bg-white shadow-md"
+                className="dark:bg-[#2b3743] p-3 rounded-md shadow-md absolute top-full w-full mt-1 flex flex-col gap-3 bg-white"
                 tabIndex="0"
               >
                 {regions.map((region, index) => (
@@ -172,9 +172,9 @@ const CountryApp = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-8 w-full">
+        <div className="flex flex-col gap-8 mx-auto max-w-[600px]">
           {data.map((country, index) => (
-            <div key={index} className="shadow-md rounded-md w-full">
+            <div key={index} className="shadow-md rounded-md mx-auto">
               <div>
                 <img
                   src={country.flags.svg}
@@ -182,18 +182,21 @@ const CountryApp = () => {
                   className="w-full rounded-t-md"
                 />
               </div>
-              <div className="px-4 py-10 dark:bg-[#2b3743] flex flex-col gap-3">
-                <h3 className="dark:text-white text-xl font-bold">
+              <div className="px-6 py-10 dark:bg-[#2b3743] flex flex-col gap-3">
+                <h3 className="dark:text-white text-2xl font-bold">
                   {country.name.common}
                 </h3>
-                <p className="dark:text-white">
-                  Population: <span>{country.population}</span>
+                <p className="dark:text-white text-[1.2rem]">
+                  <span className="font-medium">Population: </span>{" "}
+                  <span>{country.population}</span>
                 </p>
-                <p className="dark:text-white">
-                  Region: <span>{country.region}</span>
+                <p className="dark:text-white text-[1.2rem]">
+                  <span className="font-medium">Region: </span>
+                  <span>{country.region}</span>
                 </p>
-                <p className="dark:text-white">
-                  Capital: <span>{country.capital}</span>
+                <p className="dark:text-white text-[1.2rem]">
+                  <span className="font-medium">Capital: </span>{" "}
+                  <span>{country.capital}</span>
                 </p>
               </div>
             </div>
