@@ -5,6 +5,7 @@ import { faMoon as solidMoon } from "@fortawesome/free-solid-svg-icons";
 import { faSearch as searchIcon } from "@fortawesome/free-solid-svg-icons";
 import { faArrowDown as arrowIcon } from "@fortawesome/free-solid-svg-icons";
 import { Atom } from "react-loading-indicators";
+import "./index.css";
 
 const CountryApp = () => {
   const countries = [
@@ -15,6 +16,7 @@ const CountryApp = () => {
     "United Kingdom",
     "Germany",
     "Iceland",
+    "Ghana",
   ];
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -106,101 +108,111 @@ const CountryApp = () => {
 
   return (
     <div className="w-full h-full">
-      <div className="flex justify-between px-4 py-6 shadow-md w-full dark:bg-[#2b3743] items-center">
-        <h3 className="dark:text-white font-bold">Where in the world?</h3>
-        <div className="flex gap-3 items-center" onClick={toggleDarkMode}>
-          <FontAwesomeIcon
-            icon={darkMode ? solidMoon : regularMoon}
-            size="lg"
-            style={{ color: darkMode ? "white" : "black" }}
-            className="cursor-pointer hover:opacity-90"
-          />
-          <span className="hover:opacity-90 cursor-pointer dark:text-white">
-            Dark Mode
-          </span>
+      <div className="shadow-md w-full dark:bg-[#2b3743]">
+        <div className="w-full max-w-[1440px] mx-auto flex justify-between px-4 py-6 items-center sm:px-4">
+          <h3 className="dark:text-white font-bold">Where in the world?</h3>
+          <div className="flex gap-3 items-center" onClick={toggleDarkMode}>
+            <FontAwesomeIcon
+              icon={darkMode ? solidMoon : regularMoon}
+              size="lg"
+              style={{ color: darkMode ? "white" : "black" }}
+              className="cursor-pointer hover:opacity-90"
+            />
+            <span className="hover:opacity-90 cursor-pointer dark:text-white">
+              Dark Mode
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="bg-[#f5f5f5] w-full h-full dark:bg-[#202d36] py-8 flex flex-col gap-12 px-8">
-        <div className="w-full">
-          <div className="bg-white dark:bg-[#2b3743] px-6 py-4 rounded-sm flex gap-4 items-center shadow-md">
-            <FontAwesomeIcon
-              icon={searchIcon}
-              size="lg"
-              style={{ color: darkMode ? "white" : "#f0f0f0" }}
-            />
-            <input
-              type="text"
-              placeholder="Search for a country..."
-              className="bg-transparent border-none outline-none dark:text-white placeholder-[#dadada] dark:placeholder-[#e9f2fb] w-full"
-            />
-          </div>
-        </div>
-
-        <div className="w-full">
-          <div className="w-[12rem] dark:text-white flex flex-col gap-2 relative">
-            <button
-              onClick={toggleDropdown}
-              onKeyDown={handleKeyDown}
-              className="w-full dark:bg-[#2b3743] p-4 rounded-md shadow-md flex justify-between items-center cursor-pointer hover:opacity-90 bg-white"
-            >
-              {selectedRegion}
-              <FontAwesomeIcon
-                icon={arrowIcon}
-                size="lg"
-                style={{ color: darkMode ? "white" : "black" }}
-                onClick={toggleDropdown}
-              />
-            </button>
-            {isOpen && (
-              <ul
-                className="dark:bg-[#2b3743] p-3 rounded-md shadow-md absolute top-full w-full mt-1 flex flex-col gap-3 bg-white"
-                tabIndex="0"
-              >
-                {regions.map((region, index) => (
-                  <li
-                    key={region}
-                    className="hover:opacity-90 cursor-pointer"
-                    onClick={() => selectRegion(region, index)}
-                    onMouseEnter={() => setHighlightedIndex(index)}
-                  >
-                    {region}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-8 mx-auto max-w-[600px]">
-          {data.map((country, index) => (
-            <div key={index} className="shadow-md rounded-md mx-auto">
-              <div>
-                <img
-                  src={country.flags.svg}
-                  alt="Flag"
-                  className="w-full rounded-t-md"
+      <div className="bg-[#f5f5f5] w-full h-full dark:bg-[#202d36] ">
+        <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-12 p-8 sm:px-4">
+          <div className="flex flex-col gap-10 sm:flex-row sm:justify-between w-full">
+            <div>
+              <div className="bg-white dark:bg-[#2b3743] px-6 py-4 rounded-sm flex gap-4 items-center shadow-md">
+                <FontAwesomeIcon
+                  icon={searchIcon}
+                  size="lg"
+                  style={{ color: darkMode ? "white" : "#f0f0f0" }}
+                />
+                <input
+                  type="text"
+                  placeholder="Search for a country..."
+                  className="bg-transparent border-none outline-none dark:text-white placeholder-[#dadada] dark:placeholder-[#e9f2fb] w-full"
                 />
               </div>
-              <div className="px-6 py-10 dark:bg-[#2b3743] flex flex-col gap-3">
-                <h3 className="dark:text-white text-2xl font-bold">
-                  {country.name.common}
-                </h3>
-                <p className="dark:text-white text-[1.2rem]">
-                  <span className="font-medium">Population: </span>{" "}
-                  <span>{country.population}</span>
-                </p>
-                <p className="dark:text-white text-[1.2rem]">
-                  <span className="font-medium">Region: </span>
-                  <span>{country.region}</span>
-                </p>
-                <p className="dark:text-white text-[1.2rem]">
-                  <span className="font-medium">Capital: </span>{" "}
-                  <span>{country.capital}</span>
-                </p>
+            </div>
+
+            <div>
+              <div className="w-[12rem] dark:text-white flex flex-col gap-2 relative">
+                <button
+                  onClick={toggleDropdown}
+                  onKeyDown={handleKeyDown}
+                  className="w-full dark:bg-[#2b3743] p-4 rounded-md shadow-md flex justify-between items-center cursor-pointer hover:opacity-90 bg-white"
+                >
+                  {selectedRegion}
+                  <FontAwesomeIcon
+                    icon={arrowIcon}
+                    size="lg"
+                    style={{ color: darkMode ? "white" : "black" }}
+                    onClick={toggleDropdown}
+                  />
+                </button>
+                {isOpen && (
+                  <ul
+                    className="dark:bg-[#2b3743] p-3 rounded-md shadow-md absolute top-full w-full mt-1 flex flex-col gap-3 bg-white"
+                    tabIndex="0"
+                  >
+                    {regions.map((region, index) => (
+                      <li
+                        key={region}
+                        className="hover:opacity-90 cursor-pointer"
+                        onClick={() => selectRegion(region, index)}
+                        onMouseEnter={() => setHighlightedIndex(index)}
+                      >
+                        {region}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
-          ))}
+          </div>
+
+          <div className="flex flex-col gap-8 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:items-center sm:auto-cols-fr">
+            {data.map((country, index) => (
+              <div
+                key={index}
+                className="shadow-md rounded-md h-full dark:bg-[#2b3743]
+                cursor-pointer hover:opacity-85"
+              >
+                <div className="h-40 w-full overflow-hidden">
+                  <img
+                    src={country.flags.svg}
+                    alt="Flag"
+                    className="w-full h-full object-cover rounded-t-md"
+                  />
+                </div>
+                <div className="px-6 py-8 flex flex-col gap-3">
+                  <h3 className="dark:text-white text-2xl font-bold">
+                    {country.name.common}
+                  </h3>
+                  <p className="dark:text-white text-[1.2rem]">
+                    <span className="font-medium">Population: </span>{" "}
+                    <span>{country.population}</span>
+                  </p>
+                  <p className="dark:text-white text-[1.2rem]">
+                    <span className="font-medium">Region: </span>
+                    <span>{country.region}</span>
+                  </p>
+                  <p className="dark:text-white text-[1.2rem]">
+                    <span className="font-medium">Capital: </span>{" "}
+                    <span>{country.capital}</span>
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

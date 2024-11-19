@@ -17,3 +17,7 @@
 .show-region {
   display: block;
 }
+
+.country-card {
+  grid-auto-columns: 400px;
+}
