@@ -24,8 +24,9 @@ const CountryApp = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState("Filter by Region");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const regions = ["Africa", "America", "Asia", "Europe", "Oceania"];
+  const regions = ["All", "Africa", "Americas", "Europe"];
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode") === "true";
@@ -72,6 +73,52 @@ const CountryApp = () => {
     localStorage.setItem("darkMode", newDarkMode);
   };
 
+  const toggleDropdown = () => setIsOpen(!isOpen);
+
+  const selectRegion = (region, index) => {
+    setSelectedRegion(region);
+    setIsOpen(false);
+    setHighlightedIndex(index);
+  };
+
+  const handleKeyDown = (e) => {
+    if (isOpen) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault(); // Prevent default scrolling behavior
+        setHighlightedIndex((prevIndex) => (prevIndex + 1) % regions.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault(); // Prevent default scrolling behavior
+        setHighlightedIndex(
+          (prevIndex) => (prevIndex - 1 + regions.length) % regions.length
+        );
+      } else if (e.key === "Enter") {
+        e.preventDefault(); // Prevent default behavior (e.g., form submission)
+        selectRegion(regions[highlightedIndex], highlightedIndex);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setIsOpen(false);
+      }
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      setIsOpen(true);
+    }
+  };
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const filteredData = data.filter((country) => {
+    const matchesSearchTerm = country.name.common
+      .toLowerCase()
+      .includes(searchTerm);
+    const matchesRegion =
+      selectedRegion === "Filter by Region" ||
+      selectedRegion === "All" ||
+      country.region === selectedRegion;
+    return matchesSearchTerm && matchesRegion;
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-[#fff] dark:bg-[#2b3743]">
@@ -80,34 +127,8 @@ const CountryApp = () => {
     );
   }
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
-
-  const selectRegion = (region, index) => {
-    setSelectedRegion(region);
-    setIsOpen(false);
-    setHighlightedIndex(index); // Reset highlight to the selected item
-  };
-
-  const handleKeyDown = (e) => {
-    if (isOpen) {
-      if (e.key === "ArrowDown") {
-        setHighlightedIndex((prevIndex) => (prevIndex + 1) % regions.length);
-      } else if (e.key === "ArrowUp") {
-        setHighlightedIndex(
-          (prevIndex) => (prevIndex - 1 + regions.length) % regions.length
-        );
-      } else if (e.key === "Enter") {
-        selectRegion(regions[highlightedIndex], highlightedIndex);
-      } else if (e.key === "Escape") {
-        setIsOpen(false);
-      }
-    } else if (e.key === "Enter") {
-      setIsOpen(true);
-    }
-  };
-
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full dark:bg-[#202d36]">
       <div className="shadow-md w-full dark:bg-[#2b3743]">
         <div className="w-full max-w-[1440px] mx-auto flex justify-between px-4 py-6 items-center sm:px-4">
           <h3 className="dark:text-white font-bold">Where in the world?</h3>
@@ -139,6 +160,8 @@ const CountryApp = () => {
                   type="text"
                   placeholder="Search for a country..."
                   className="bg-transparent border-none outline-none dark:text-white placeholder-[#dadada] dark:placeholder-[#e9f2fb] w-full"
+                  value={searchTerm}
+                  onChange={handleSearch}
                 />
               </div>
             </div>
@@ -166,7 +189,11 @@ const CountryApp = () => {
                     {regions.map((region, index) => (
                       <li
                         key={region}
-                        className="hover:opacity-90 cursor-pointer"
+                        className={`hover:opacity-90 cursor-pointer ${
+                          index === highlightedIndex
+                            ? "bg-gray-200 dark:bg-gray-700"
+                            : ""
+                        }`}
                         onClick={() => selectRegion(region, index)}
                         onMouseEnter={() => setHighlightedIndex(index)}
                       >
@@ -180,7 +207,7 @@ const CountryApp = () => {
           </div>
 
           <div className="flex flex-col gap-8 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:items-center sm:auto-cols-fr">
-            {data.map((country, index) => (
+            {filteredData.map((country, index) => (
               <div
                 key={index}
                 className="shadow-md rounded-md h-full dark:bg-[#2b3743]
@@ -199,14 +226,14 @@ const CountryApp = () => {
                   </h3>
                   <p className="dark:text-white text-[1.2rem]">
                     <span className="font-medium">Population: </span>{" "}
-                    <span>{country.population}</span>
+                    <span>{country.population.toLocaleString()}</span>
                   </p>
                   <p className="dark:text-white text-[1.2rem]">
                     <span className="font-medium">Region: </span>
                     <span>{country.region}</span>
                   </p>
                   <p className="dark:text-white text-[1.2rem]">
-                    <span className="font-medium">Capital: </span>{" "}
+                    <span className="font-medium">Capital: </span>
                     <span>{country.capital}</span>
                   </p>
                 </div>
