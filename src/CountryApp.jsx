@@ -6,6 +6,7 @@ import { faSearch as searchIcon } from "@fortawesome/free-solid-svg-icons";
 import { faArrowDown as arrowIcon } from "@fortawesome/free-solid-svg-icons";
 import { Atom } from "react-loading-indicators";
 import "./index.css";
+import { Link } from "react-router-dom";
 
 const CountryApp = () => {
   const countries = [
@@ -16,7 +17,7 @@ const CountryApp = () => {
     "United Kingdom",
     "Germany",
     "Iceland",
-    "Ghana",
+    "Belgium",
   ];
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -128,8 +129,8 @@ const CountryApp = () => {
   }
 
   return (
-    <div className="w-full h-full dark:bg-[#202d36]">
-      <div className="shadow-md w-full dark:bg-[#2b3743]">
+    <div className="w-full h-full min-h-screen dark:bg-[#202d36] bg-[#f5f5f5]">
+      <div className="shadow-md w-full dark:bg-[#2b3743] bg-white">
         <div className="w-full max-w-[1440px] mx-auto flex justify-between px-4 py-6 items-center sm:px-4">
           <h3 className="dark:text-white font-bold">Where in the world?</h3>
           <div className="flex gap-3 items-center" onClick={toggleDarkMode}>
@@ -206,10 +207,11 @@ const CountryApp = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-8 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:items-center sm:auto-cols-fr">
+          <div className="flex flex-col gap-8 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:items-center sm:auto-cols-fr w-full h-full">
             {filteredData.map((country, index) => (
-              <div
+              <Link
                 key={index}
+                to={`/country/${country.name.common}`}
                 className="shadow-md rounded-md h-full dark:bg-[#2b3743]
                 cursor-pointer hover:opacity-85"
               >
@@ -224,6 +226,7 @@ const CountryApp = () => {
                   <h3 className="dark:text-white text-2xl font-bold">
                     {country.name.common}
                   </h3>
+                  <div></div>
                   <p className="dark:text-white text-[1.2rem]">
                     <span className="font-medium">Population: </span>{" "}
                     <span>{country.population.toLocaleString()}</span>
@@ -237,7 +240,7 @@ const CountryApp = () => {
                     <span>{country.capital}</span>
                   </p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
