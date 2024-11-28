@@ -123,7 +123,7 @@ const CountryApp = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-[#fff] dark:bg-[#2b3743]">
-        <Atom color="#3178cc" size="medium" text="" textColor="" />
+        <Atom color="#32cd32" size="medium" text="" textColor="" />
       </div>
     );
   }

@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon as regularMoon } from "@fortawesome/free-regular-svg-icons";
 import { faMoon as solidMoon } from "@fortawesome/free-solid-svg-icons";
 import { faArrowLeft as leftArrow } from "@fortawesome/free-solid-svg-icons";
-import { Atom } from "react-loading-indicators";
+import { FourSquare } from "react-loading-indicators";
 
 const CountryDetail = () => {
   const { name } = useParams(); // Get the country name from the URL
@@ -67,7 +67,11 @@ const CountryDetail = () => {
   }, [darkMode]);
 
   if (!countryData) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen bg-[#fff] dark:bg-[#2b3743]">
+        <FourSquare color="#32cd32" size="medium" text="" textColor="" />
+      </div>
+    );
   }
 
   const toggleDarkMode = () => {
@@ -96,7 +100,7 @@ const CountryDetail = () => {
         </div>
       </div>
 
-      <div className="w-full px-4 cursor-pointer hover:opacity-90">
+      <div className="w-full px-4 cursor-pointer hover:opacity-90 max-w-[1440px] mx-auto">
         <Link
           to={"/"}
           className="shadow-md rounded-sm bg-white dark:bg-[#2b3743] py-2 px-6 flex gap-4 w-[7rem] items-center"
@@ -111,24 +115,24 @@ const CountryDetail = () => {
         </Link>
       </div>
 
-      <div className="flex flex-col px-4 gap-4">
-        <div className="h-[13rem] overflow-hidden mx-auto">
+      <div className="flex flex-col px-4 gap-4 lg:grid lg:grid-cols-2 max-w-[1440px] lg:justify-between w-full mx-auto">
+        <div className="h-[13rem] overflow-hidden lg:h-full lg:w-[30rem] sm:mx-auto lg:mx-0 shadow-md">
           <img
             src={countryData.flags.svg}
             alt="Flag"
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="flex flex-col gap-2">
-          <h3 className="dark:text-white text-2xl font-bold">
+        <div className="flex flex-col gap-2 sm:mx-auto sm:mt-[4rem] lg:mt-0">
+          <h3 className="dark:text-white text-2xl font-bold mb-10">
             {countryData.name.common}
           </h3>
 
-          <div className="flex flex-col gap-10">
-            <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-10 sm:grid sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Native Name: </span>
-                <span>
+                <span className="dark:text-[#88959e]">
                   {countryData.name.nativeName
                     ? Object.values(countryData.name.nativeName)[0].common
                     : "N/A"}
@@ -137,30 +141,50 @@ const CountryDetail = () => {
 
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Population: </span>{" "}
-                <span>{countryData.population.toLocaleString()}</span>
+                <span className="dark:text-[#88959e]">
+                  {countryData.population.toLocaleString()}
+                </span>
               </p>
 
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Region: </span>
-                <span>{countryData.region}</span>
+                <span className="dark:text-[#88959e]">
+                  {countryData.region}
+                </span>
               </p>
 
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Subregion: </span>
-                <span>{countryData.subregion}</span>
+                <span className="dark:text-[#88959e]">
+                  {countryData.subregion}
+                </span>
               </p>
 
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Capital: </span>
-                <span>{countryData.capital}</span>
+                <span className="dark:text-[#88959e]">
+                  {countryData.capital}
+                </span>
               </p>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <p className="text-black dark:text-white text-[1.2rem]">
-                <span>Currencies: </span>
-                {Object.values(countryData.currencies)[0].name} (
-                {Object.values(countryData.currencies)[0].symbol})
+            <div className="flex flex-col gap-2">
+              <p className="text-[1.2rem]">
+                <span className="dark:text-white font-medium">
+                  Top Level Domain:{" "}
+                </span>
+                <span className="dark:text-[#88959e]">
+                  {countryData.tld ? countryData.tld.join(", ") : "N/A"}
+                </span>
+              </p>
+              <p className="text-[1.2rem]">
+                <span className="dark:text-white font-medium">
+                  Currencies:{" "}
+                </span>
+                <span className="dark:text-[#88959e]">
+                  {Object.values(countryData.currencies)[0].name} (
+                  {Object.values(countryData.currencies)[0].symbol})
+                </span>
               </p>
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Languages: </span>
@@ -169,12 +193,15 @@ const CountryDetail = () => {
             </div>
           </div>
 
-          <div className="dark:text-white text-[1.2rem] flex flex-col gap-3">
-            <p className="font-medium">Border Countries: </p>
+          <div className="dark:text-white text-[1.2rem] flex flex-col gap-2 mt-[3rem] lg:flex-row sm:items-center">
+            <p className="font-medium whitespace-nowrap">Border Countries: </p>
             {borderCountries.length > 0 ? (
-              <div className="flex gap-3">
+              <div className="flex gap-1 flex-wrap">
                 {borderCountries.map((name, index) => (
-                  <p key={index} className="inline-block">
+                  <p
+                    key={index}
+                    className="inline-block shadow-md dark:bg-[#2b3743] p-2 rounded-sm cursor-pointer hover:opacity-90"
+                  >
                     <span className="dark:text-white">{name}</span>
                   </p>
                 ))}
