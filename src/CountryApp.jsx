@@ -27,7 +27,10 @@ const CountryApp = () => {
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const regions = ["All", "Africa", "Americas", "Europe"];
+  const getUniqueRegions = () => {
+    const allRegions = data.map((country) => country.region);
+    return ["All", ...new Set(allRegions)];
+  };
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode") === "true";
@@ -105,8 +108,39 @@ const CountryApp = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value.toLowerCase());
+  const handleSearch = async (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+
+    if (term === "") {
+      setLoading(false); // Reset to show the original data
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `https://restcountries.com/v3.1/name/${term}`
+      );
+      if (!response.ok) {
+        throw new Error("Country not found");
+      }
+      const countryData = await response.json();
+      setData((prevData) => {
+        const uniqueCountries = new Map(
+          [...prevData, ...countryData].map((country) => [
+            country.name.common,
+            country,
+          ])
+        );
+        return Array.from(uniqueCountries.values());
+      });
+    } catch (error) {
+      console.error("Error fetching data for searched country:", error);
+      setData([]); // Clear data to show no results
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredData = data.filter((country) => {
@@ -114,8 +148,8 @@ const CountryApp = () => {
       .toLowerCase()
       .includes(searchTerm);
     const matchesRegion =
-      selectedRegion === "Filter by Region" ||
       selectedRegion === "All" ||
+      selectedRegion === "Filter by Region" ||
       country.region === selectedRegion;
     return matchesSearchTerm && matchesRegion;
   });
@@ -184,10 +218,10 @@ const CountryApp = () => {
                 </button>
                 {isOpen && (
                   <ul
-                    className="dark:bg-[#2b3743] p-3 rounded-md shadow-md absolute top-full w-full mt-1 flex flex-col gap-3 bg-white"
+                    className="dark:bg-[#2b3743] p-3 rounded-md shadow-md absolute top-full w-full mt-1 flex flex-col gap-3 bg-white max-h-60 overflow-y-auto"
                     tabIndex="0"
                   >
-                    {regions.map((region, index) => (
+                    {getUniqueRegions().map((region, index) => (
                       <li
                         key={region}
                         className={`hover:opacity-90 cursor-pointer ${
