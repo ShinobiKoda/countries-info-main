@@ -4,12 +4,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon as regularMoon } from "@fortawesome/free-regular-svg-icons";
 import { faMoon as solidMoon } from "@fortawesome/free-solid-svg-icons";
 import { faArrowLeft as leftArrow } from "@fortawesome/free-solid-svg-icons";
-import { FourSquare } from "react-loading-indicators";
+import Skeleton from "react-loading-skeleton";
 
 const CountryDetail = () => {
   const { name } = useParams(); // Get the country name from the URL
   const [countryData, setCountryData] = useState(null);
   const [borderCountries, setBorderCountries] = useState([]); // State for border country names
+  const [loadingBorders, setLoadingBorders] = useState(true); // New state for border loading
   const [darkMode, setDarkMode] = useState(() => {
     // Check the saved dark mode preference from localStorage
     return localStorage.getItem("darkMode") === "true";
@@ -36,6 +37,7 @@ const CountryDetail = () => {
 
   useEffect(() => {
     const fetchBorderCountryNames = async (borderCodes) => {
+      setLoadingBorders(true);
       try {
         const response = await fetch(
           `https://restcountries.com/v3.1/alpha?codes=${borderCodes.join(",")}`
@@ -50,11 +52,15 @@ const CountryDetail = () => {
         setBorderCountries(borderCountryNames); // Store the names in state
       } catch (error) {
         console.error("Error fetching border country data:", error);
+      } finally {
+        setLoadingBorders(false);
       }
     };
 
     if (countryData?.borders) {
       fetchBorderCountryNames(countryData.borders);
+    } else {
+      setLoadingBorders(false);
     }
   }, [countryData]);
 
@@ -69,7 +75,28 @@ const CountryDetail = () => {
   if (!countryData) {
     return (
       <div className="flex justify-center items-center h-screen bg-[#fff] dark:bg-[#2b3743]">
-        <FourSquare color="#32cd32" size="medium" text="" textColor="" />
+        <div className="w-full max-w-[1440px] p-4">
+          {/* Back button skeleton */}
+          <Skeleton height={40} width={120} className="mb-6" />
+
+          {/* Flag skeleton */}
+          <Skeleton height={300} className="mb-6" />
+
+          {/* Name and details skeleton */}
+          <div className="mb-6">
+            <Skeleton height={30} width="60%" className="mb-4" />
+            <Skeleton height={20} width="90%" className="mb-2" />
+            <Skeleton height={20} width="80%" />
+          </div>
+
+          {/* Border countries skeleton */}
+          <Skeleton height={20} width="50%" className="mb-2" />
+          <div className="flex gap-2">
+            {[...Array(3)].map((_, index) => (
+              <Skeleton key={index} height={30} width={100} />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -83,6 +110,7 @@ const CountryDetail = () => {
 
   return (
     <div className="w-full h-full min-h-screen dark:bg-[#202d36] bg-[#f5f5f5] flex flex-col gap-12">
+      {/* Navbar */}
       <div className="shadow-md w-full dark:bg-[#2b3743] bg-white">
         <div className="w-full max-w-[1440px] mx-auto flex justify-between px-4 py-6 items-center sm:px-4">
           <h3 className="dark:text-white font-bold">Where in the world?</h3>
@@ -100,6 +128,7 @@ const CountryDetail = () => {
         </div>
       </div>
 
+      {/* Back Button */}
       <div className="w-full px-4 cursor-pointer hover:opacity-90 max-w-[1440px] mx-auto">
         <Link
           to={"/"}
@@ -115,7 +144,9 @@ const CountryDetail = () => {
         </Link>
       </div>
 
+      {/* Content */}
       <div className="flex flex-col px-4 gap-4 lg:grid lg:grid-cols-2 max-w-[1440px] lg:justify-between w-full mx-auto">
+        {/* Flag */}
         <div className="h-[13rem] overflow-hidden lg:h-full lg:w-[30rem] sm:mx-auto lg:mx-0 shadow-md">
           <img
             src={countryData.flags.svg}
@@ -123,12 +154,16 @@ const CountryDetail = () => {
             className="w-full h-full object-cover"
           />
         </div>
+
+        {/* Details */}
         <div className="flex flex-col gap-2 sm:mx-auto sm:mt-[4rem] lg:mt-0">
           <h3 className="dark:text-white text-2xl font-bold mb-10">
             {countryData.name.common}
           </h3>
 
+          {/* Information */}
           <div className="flex flex-col gap-10 sm:grid sm:grid-cols-2">
+            {/* Details Left */}
             <div className="flex flex-col gap-2">
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Native Name: </span>
@@ -138,28 +173,24 @@ const CountryDetail = () => {
                     : "N/A"}
                 </span>
               </p>
-
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Population: </span>{" "}
                 <span className="dark:text-[#88959e]">
                   {countryData.population.toLocaleString()}
                 </span>
               </p>
-
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Region: </span>
                 <span className="dark:text-[#88959e]">
                   {countryData.region}
                 </span>
               </p>
-
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Subregion: </span>
                 <span className="dark:text-[#88959e]">
                   {countryData.subregion}
                 </span>
               </p>
-
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Capital: </span>
                 <span className="dark:text-[#88959e]">
@@ -168,6 +199,7 @@ const CountryDetail = () => {
               </p>
             </div>
 
+            {/* Details Right */}
             <div className="flex flex-col gap-2">
               <p className="text-[1.2rem]">
                 <span className="dark:text-white font-medium">
@@ -182,33 +214,46 @@ const CountryDetail = () => {
                   Currencies:{" "}
                 </span>
                 <span className="dark:text-[#88959e]">
-                  {Object.values(countryData.currencies)[0].name} (
-                  {Object.values(countryData.currencies)[0].symbol})
+                  {countryData.currencies
+                    ? Object.values(countryData.currencies)
+                        .map((currency) => currency.name)
+                        .join(", ")
+                    : "N/A"}
                 </span>
               </p>
               <p className="dark:text-white text-[1.2rem]">
                 <span className="font-medium">Languages: </span>
-                <span>{Object.values(countryData.languages).join(", ")}</span>
+                <span className="dark:text-[#88959e]">
+                  {countryData.languages
+                    ? Object.values(countryData.languages).join(", ")
+                    : "N/A"}
+                </span>
               </p>
             </div>
           </div>
 
-          <div className="dark:text-white text-[1.2rem] flex flex-col gap-2 mt-[3rem] lg:flex-row sm:items-center">
-            <p className="font-medium whitespace-nowrap">Border Countries: </p>
-            {borderCountries.length > 0 ? (
-              <div className="flex gap-1 flex-wrap">
-                {borderCountries.map((name, index) => (
-                  <p
+          {/* Border Countries */}
+          <div>
+            <p className="text-[1.2rem] dark:text-white">Border Countries:</p>
+            <div className="flex gap-2 flex-wrap">
+              {loadingBorders ? (
+                [...Array(3)].map((_, index) => (
+                  <Skeleton key={index} height={30} width={100} />
+                ))
+              ) : borderCountries.length ? (
+                borderCountries.map((country, index) => (
+                  <Link
+                    to={`/country/${country}`}
                     key={index}
-                    className="inline-block shadow-md dark:bg-[#2b3743] p-2 rounded-sm cursor-pointer hover:opacity-90"
+                    className="shadow-md py-2 px-4 bg-white dark:bg-[#2b3743] rounded-sm cursor-pointer hover:opacity-90"
                   >
-                    <span className="dark:text-white">{name}</span>
-                  </p>
-                ))}
-              </div>
-            ) : (
-              <span>None</span>
-            )}
+                    <p className="dark:text-white">{country}</p>
+                  </Link>
+                ))
+              ) : (
+                <p className="dark:text-[#88959e] text-[1.2rem]">None</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

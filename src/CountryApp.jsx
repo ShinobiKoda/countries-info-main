@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon as regularMoon } from "@fortawesome/free-regular-svg-icons";
 import { faMoon as solidMoon } from "@fortawesome/free-solid-svg-icons";
 import { faSearch as searchIcon } from "@fortawesome/free-solid-svg-icons";
 import { faArrowDown as arrowIcon } from "@fortawesome/free-solid-svg-icons";
-import { Atom } from "react-loading-indicators";
 import "./index.css";
 import { Link } from "react-router-dom";
+import SkeletonLoader from "./SkeletonLoader";
+import _ from "lodash";
 
 const CountryApp = () => {
   const countries = [
@@ -26,6 +27,8 @@ const CountryApp = () => {
   const [selectedRegion, setSelectedRegion] = useState("Filter by Region");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const searchInputRef = useRef(null);
 
   const getUniqueRegions = () => {
     const allRegions = data.map((country) => country.region);
@@ -77,7 +80,10 @@ const CountryApp = () => {
     localStorage.setItem("darkMode", newDarkMode);
   };
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
+  const toggleDropdown = (e) => {
+    e.preventDefault(); // Prevent scrolling behavior
+    setIsOpen(!isOpen);
+  };
 
   const selectRegion = (region, index) => {
     setSelectedRegion(region);
@@ -117,7 +123,13 @@ const CountryApp = () => {
       return;
     }
 
+    // Trigger search only if the search term is sufficiently long (e.g., 3 characters or more)
+    if (term.length < 3) {
+      return; // You can adjust the length as per your requirement
+    }
+
     setLoading(true);
+
     try {
       const response = await fetch(
         `https://restcountries.com/v3.1/name/${term}`
@@ -126,21 +138,23 @@ const CountryApp = () => {
         throw new Error("Country not found");
       }
       const countryData = await response.json();
-      setData((prevData) => {
-        const uniqueCountries = new Map(
-          [...prevData, ...countryData].map((country) => [
-            country.name.common,
-            country,
-          ])
-        );
-        return Array.from(uniqueCountries.values());
-      });
+      setData(countryData);
     } catch (error) {
       console.error("Error fetching data for searched country:", error);
       setData([]); // Clear data to show no results
     } finally {
       setLoading(false);
     }
+  };
+
+  // Using lodash debounce
+  const debouncedSearch = useRef(_.debounce(handleSearch, 500)).current;
+
+  // Attach debouncedSearch to the input onChange event
+  const handleSearchDebounced = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    debouncedSearch(e);
   };
 
   const filteredData = data.filter((country) => {
@@ -156,14 +170,79 @@ const CountryApp = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-[#fff] dark:bg-[#2b3743]">
-        <Atom color="#32cd32" size="medium" text="" textColor="" />
+      <div className="w-full h-full min-h-screen dark:bg-[#202d36] bg-[#f5f5f5]">
+        {/* Navigation Bar */}
+        <div className="shadow-md w-full dark:bg-[#2b3743] bg-white">
+          <div className="w-full max-w-[1440px] mx-auto flex justify-between px-4 py-6 items-center sm:px-4">
+            <h3 className="dark:text-white font-bold">Where in the world?</h3>
+            <div className="flex gap-3 items-center" onClick={toggleDarkMode}>
+              <FontAwesomeIcon
+                icon={darkMode ? solidMoon : regularMoon}
+                size="lg"
+                style={{ color: darkMode ? "white" : "black" }}
+                className="cursor-pointer hover:opacity-90"
+              />
+              <span className="hover:opacity-90 cursor-pointer dark:text-white">
+                Dark Mode
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filter Section */}
+        <div className="bg-[#f5f5f5] w-full h-full dark:bg-[#202d36]">
+          <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-12 p-8 sm:px-4">
+            <div className="flex flex-col gap-10 sm:flex-row sm:justify-between w-full">
+              <div>
+                <div className="bg-white dark:bg-[#2b3743] px-6 py-4 rounded-sm flex gap-4 items-center shadow-md">
+                  <FontAwesomeIcon
+                    icon={searchIcon}
+                    size="lg"
+                    style={{ color: darkMode ? "white" : "#f0f0f0" }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search for a country..."
+                    className="bg-transparent border-none outline-none dark:text-white placeholder-[#dadada] dark:placeholder-[#e9f2fb] w-full"
+                    value={searchTerm}
+                    onChange={handleSearchDebounced}
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="w-[12rem] dark:text-white flex flex-col gap-2 relative">
+                  <button
+                    className="w-full dark:bg-[#2b3743] p-4 rounded-md shadow-md flex justify-between items-center cursor-not-allowed bg-white"
+                    disabled
+                  >
+                    {selectedRegion}
+                    <FontAwesomeIcon
+                      icon={arrowIcon}
+                      size="lg"
+                      style={{ color: darkMode ? "white" : "black" }}
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Loading Content */}
+            <div className="flex flex-col gap-8 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:items-center sm:auto-cols-fr w-full h-full">
+              {[...Array(8)].map((_, index) => (
+                <SkeletonLoader key={index} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="w-full h-full min-h-screen dark:bg-[#202d36] bg-[#f5f5f5]">
+      {/* Navigation Bar */}
       <div className="shadow-md w-full dark:bg-[#2b3743] bg-white">
         <div className="w-full max-w-[1440px] mx-auto flex justify-between px-4 py-6 items-center sm:px-4">
           <h3 className="dark:text-white font-bold">Where in the world?</h3>
@@ -181,6 +260,7 @@ const CountryApp = () => {
         </div>
       </div>
 
+      {/* Search Bar and Dropdown */}
       <div className="bg-[#f5f5f5] w-full h-full dark:bg-[#202d36] ">
         <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-12 p-8 sm:px-4">
           <div className="flex flex-col gap-10 sm:flex-row sm:justify-between w-full">
@@ -196,7 +276,7 @@ const CountryApp = () => {
                   placeholder="Search for a country..."
                   className="bg-transparent border-none outline-none dark:text-white placeholder-[#dadada] dark:placeholder-[#e9f2fb] w-full"
                   value={searchTerm}
-                  onChange={handleSearch}
+                  onChange={handleSearchDebounced}
                 />
               </div>
             </div>
@@ -213,7 +293,6 @@ const CountryApp = () => {
                     icon={arrowIcon}
                     size="lg"
                     style={{ color: darkMode ? "white" : "black" }}
-                    onClick={toggleDropdown}
                   />
                 </button>
                 {isOpen && (
@@ -241,41 +320,44 @@ const CountryApp = () => {
             </div>
           </div>
 
+          {/* Content Area */}
           <div className="flex flex-col gap-8 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:items-center sm:auto-cols-fr w-full h-full">
-            {filteredData.map((country, index) => (
-              <Link
-                key={index}
-                to={`/country/${country.name.common}`}
-                className="shadow-md rounded-md h-full dark:bg-[#2b3743]
-                cursor-pointer hover:opacity-85"
-              >
-                <div className="h-40 w-full overflow-hidden">
-                  <img
-                    src={country.flags.svg}
-                    alt="Flag"
-                    className="w-full h-full object-cover rounded-t-md"
-                  />
-                </div>
-                <div className="px-6 py-8 flex flex-col gap-3">
-                  <h3 className="dark:text-white text-2xl font-bold">
-                    {country.name.common}
-                  </h3>
-                  <div></div>
-                  <p className="dark:text-white text-[1.2rem]">
-                    <span className="font-medium">Population: </span>{" "}
-                    <span>{country.population.toLocaleString()}</span>
-                  </p>
-                  <p className="dark:text-white text-[1.2rem]">
-                    <span className="font-medium">Region: </span>
-                    <span>{country.region}</span>
-                  </p>
-                  <p className="dark:text-white text-[1.2rem]">
-                    <span className="font-medium">Capital: </span>
-                    <span>{country.capital}</span>
-                  </p>
-                </div>
-              </Link>
-            ))}
+            {/* Show skeleton loader if loading, else show the country data */}
+            {loading
+              ? [...Array(8)].map((_, index) => <SkeletonLoader key={index} />)
+              : filteredData.map((country, index) => (
+                  <Link
+                    key={index}
+                    to={`/country/${country.name.common}`}
+                    className="shadow-md rounded-md h-full dark:bg-[#2b3743]
+                  cursor-pointer hover:opacity-85"
+                  >
+                    <div className="h-40 w-full overflow-hidden">
+                      <img
+                        src={country.flags.svg}
+                        alt="Flag"
+                        className="w-full h-full object-cover rounded-t-md"
+                      />
+                    </div>
+                    <div className="px-6 py-8 flex flex-col gap-3">
+                      <h3 className="dark:text-white text-2xl font-bold">
+                        {country.name.common}
+                      </h3>
+                      <p className="dark:text-white text-[1.2rem]">
+                        <span className="font-medium">Population: </span>{" "}
+                        <span>{country.population.toLocaleString()}</span>
+                      </p>
+                      <p className="dark:text-white text-[1.2rem]">
+                        <span className="font-medium">Region: </span>
+                        <span>{country.region}</span>
+                      </p>
+                      <p className="dark:text-white text-[1.2rem]">
+                        <span className="font-medium">Capital: </span>
+                        <span>{country.capital}</span>
+                      </p>
+                    </div>
+                  </Link>
+                ))}
           </div>
         </div>
       </div>
